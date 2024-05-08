@@ -17,23 +17,24 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-const logger = async (req, res, next) => {
-  console.log("called:", req.host, req.originalUrl);
+// custom middleware
+const logger = (req, res, next) => {
+  console.log("called:", req.host, req.originalUrl, req.method);
   next();
 };
 
 const verifyToken = async (req, res, next) => {
-  const token = req.cookies?.token;
-  console.log("Middle", token);
+  const token = req?.cookies?.token;
+  // console.log("Middle", token);
   if (!token) {
-    return res.status(401).send({ message: "Not Authorized" });
+    return res.status(401).send({ message: "Unauthorized" });
   }
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) {
-      console.log(err);
-      return res.status(401).send({ message: "Not Authorized" });
+      // console.log(err);
+      return res.status(401).send({ message: "Unauthorized" });
     }
-    console.log("Value in Token", decoded);
+    // console.log("Value in Token", decoded);
     req.user = decoded;
     next();
   });
@@ -60,9 +61,9 @@ async function run() {
 
     //   auth
     app.post("/jwt", logger, async (req, res) => {
-      const userEmail = req.body;
-      console.log(userEmail);
-      const token = await jwt.sign(userEmail, process.env.ACCESS_TOKEN_SECRET, {
+      const user = req.body;
+      console.log("user for token", user);
+      const token = await jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1h",
       });
       res
@@ -74,6 +75,12 @@ async function run() {
         .send({ success: true });
     });
     //   require('crypto').randomBytes(64).toString('hex')
+
+    app.post("/logout", async (req, res) => {
+      const user = req.body;
+      console.log("logout", user);
+      res.clearCookie("token", { maxAge: 0 }).send({ success: true });
+    });
 
     //   services
     app.get("/services", logger, async (req, res) => {
@@ -95,8 +102,8 @@ async function run() {
     //   bookings
 
     app.get("/bookings", logger, verifyToken, async (req, res) => {
-      //   console.log("test", req.cookies.token);
-      //   console.log("this", req.query.email);
+      // console.log("test", req.cookies);
+      console.log("this", req.user);
       if (req.query.email !== req.user.email) {
         return res.status(403).send({ message: "Forbidden!" });
       }
