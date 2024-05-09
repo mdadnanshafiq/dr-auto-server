@@ -10,7 +10,11 @@ const port = process.env.PORT || 7000;
 // middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      // "http://localhost:5173",
+      "https://drauto-4bd34.web.app",
+      "https://drauto-4bd34.firebaseapp.com",
+    ],
     credentials: true,
   })
 );
@@ -54,7 +58,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const serviceCollection = client.db("drAuto").collection("services");
     const bookingsCollection = client.db("drAuto").collection("bookings");
@@ -149,9 +153,9 @@ async function run() {
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // console.log(
+    //   "Pinged your deployment. You successfully connected to MongoDB!"
+    // );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
