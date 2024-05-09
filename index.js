@@ -23,7 +23,7 @@ app.use(cookieParser());
 
 // custom middleware
 const logger = (req, res, next) => {
-  console.log("called:", req.host, req.originalUrl, req.method);
+  // console.log("called:", req.host, req.originalUrl, req.method);
   next();
 };
 
@@ -72,7 +72,7 @@ async function run() {
     //   auth
     app.post("/jwt", logger, async (req, res) => {
       const user = req.body;
-      console.log("user for token", user);
+      // console.log("user for token", user);
       const token = await jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1h",
       });
@@ -82,7 +82,7 @@ async function run() {
 
     app.post("/logout", async (req, res) => {
       const user = req.body;
-      console.log("logout", user);
+      // console.log("logout", user);
       res
         .clearCookie("token", { ...cookieOpt, maxAge: 0 })
         .send({ success: true });
@@ -109,7 +109,7 @@ async function run() {
 
     app.get("/bookings", logger, verifyToken, async (req, res) => {
       // console.log("test", req.cookies);
-      console.log("this", req.user);
+      // console.log("this", req.user);
       if (req.query.email !== req.user.email) {
         return res.status(403).send({ message: "Forbidden!" });
       }
@@ -170,5 +170,5 @@ app.get("/", (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`port: ${port}`);
+  // console.log(`port: ${port}`);
 });
