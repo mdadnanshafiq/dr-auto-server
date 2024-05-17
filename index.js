@@ -11,7 +11,7 @@ const port = process.env.PORT || 7000;
 app.use(
   cors({
     origin: [
-      // "http://localhost:5173",
+      "http://localhost:5173",
       "https://drauto-4bd34.web.app",
       "https://drauto-4bd34.firebaseapp.com",
     ],
@@ -90,7 +90,21 @@ async function run() {
 
     //   services
     app.get("/services", logger, async (req, res) => {
-      const cursor = serviceCollection.find();
+      const filter = req.query;
+      // console.log(query);
+      // const query = {
+      //   price: { $lt: 100 },
+      // };
+      // const query = {};
+      const query = {
+        title: { $regex: filter.search, $options: "i" },
+      };
+      const options = {
+        sort: {
+          price: filter.sort === "asc" ? 1 : -1,
+        },
+      };
+      const cursor = serviceCollection.find(query, options);
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -170,5 +184,5 @@ app.get("/", (req, res) => {
 });
 
 app.listen(port, () => {
-  // console.log(`port: ${port}`);
+  console.log(`port: ${port}`);
 });
